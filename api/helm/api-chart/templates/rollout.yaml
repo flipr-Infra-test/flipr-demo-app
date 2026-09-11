@@ -1,0 +1,52 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.targetPort }}
+          name: http
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        {{- if .Values.persistence.enabled }}
+        volumeMounts:
+        - name: uploads-storage
+          mountPath: {{ .Values.persistence.mountPath }}
+        {{- end }}
+      {{- if .Values.persistence.enabled }}
+      volumes:
+      - name: uploads-storage
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-pvc
+      {{- end }}
+  strategy:
+    canary:
+      canaryService: {{ .Release.Name }}-canary
+      stableService: {{ .Release.Name }}-stable
+      trafficRouting:
+        nginx:
+          stableIngress: {{ .Release.Name }}-ingress
+      steps:
+        {{- toYaml .Values.rollout.canary.steps | nindent 8 }}

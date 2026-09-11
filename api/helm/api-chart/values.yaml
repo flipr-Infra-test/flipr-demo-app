@@ -1,0 +1,35 @@
+replicaCount: 3
+
+image:
+  repository: docker-registry.registry.svc.cluster.local:5000/flipr-demo-app-api
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: api.flipr-demo-app.flipr.local
+      paths:
+        - path: /
+          pathType: Prefix
+
+rollout:
+  canary:
+    steps:
+      - setWeight: 20
+      - pause: { duration: 30s }
+      - setWeight: 50
+      - pause: { duration: 30s }
+      - setWeight: 100
+
+persistence:
+  enabled: true
+  storageClass: "longhorn"
+  size: 5Gi
+  mountPath: /app/uploads
