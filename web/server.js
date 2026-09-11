@@ -14,5 +14,5 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Demo Web Server running on port ${PORT}`);
+  console.log(`Demo Web deploy Server running on port ${PORT}`);
 });
