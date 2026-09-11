@@ -8,19 +8,29 @@ metadata:
     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
-  ingressClassName: {{ .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className | default "nginx" }}
   rules:
   {{- range .Values.ingress.hosts }}
   - host: {{ .host }}
     http:
       paths:
+      {{- if .paths }}
       {{- range .paths }}
       - path: {{ .path }}
-        pathType: {{ .pathType }}
+        pathType: {{ .pathType | default "Prefix" }}
         backend:
           service:
             name: {{ $.Release.Name }}-stable
             port:
-              number: {{ $.Values.service.port }}
+              number: {{ $.Values.service.port | default 80 }}
+      {{- end }}
+      {{- else }}
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ $.Release.Name }}-stable
+            port:
+              number: {{ $.Values.service.port | default 80 }}
       {{- end }}
   {{- end }}
