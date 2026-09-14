@@ -11,7 +11,11 @@ fs.writeFileSync('dist/index.html', `<!DOCTYPE html>
   <div style="background: #1e293b; padding: 20px; border-radius: 8px; display: inline-block;">
     <p>Version: <strong>1.0.0</strong></p>
     <p>Status: <span style="color: #22c55e;">● Healthy</span></p>
+    <p>Base URL: <strong>${process.env.REACT_APP_BASE_URL || 'Not Set'}</strong></p>
   </div>
+  <script>
+    console.log("REACT_APP_BASE_URL:", "${process.env.REACT_APP_BASE_URL || ''}");
+  </script>
 </body>
 </html>`);
 console.log('Build completed: dist/index.html created.');

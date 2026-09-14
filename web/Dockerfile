@@ -1,5 +1,9 @@
 FROM node:24-alpine AS builder
+
+ARG REACT_APP_BASE_URL="https://google.com"
+ENV REACT_APP_BASE_URL=$REACT_APP_BASE_URL
 WORKDIR /app
+
 COPY package*.json ./
 RUN npm install
 COPY . .
